@@ -1,15 +1,17 @@
 import i18next from 'i18next'
 import { uid } from '@/lib/utils'
+import { DEFAULT_STORE_ID, defaultStore, getStore, isStoreSelectable, storeHasTable } from '@/data/stores'
 import type { AppAction, AppState } from '@/types'
 
 export const initialState: AppState = {
   view: 'home',
+  currentStoreId: DEFAULT_STORE_ID,
   table: null,
   diners: ['姚乾', '林溪', '陈默'],
   cart: [],
   orderItems: [],
   orderStage: 'submitted',
-  soldOut: ['p8'],
+  soldOut: defaultStore().soldOut,
   services: [],
   paid: false,
   lastMessage: i18next.t('message.welcome'),
@@ -26,8 +28,14 @@ const localeForLanguage = (lang: string) => (lang === 'en' ? 'en-US' : 'zh-CN')
 
 export function orderReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
-    case 'BIND_TABLE':
+    case 'BIND_TABLE': {
+      // 桌台门店隔离：只能绑定当前门店的桌台，异店桌码提示重新扫码
+      const store = getStore(state.currentStoreId)
+      if (!store || !storeHasTable(store, action.table)) {
+        return { ...state, lastMessage: i18next.t('message.store_table_mismatch') }
+      }
       return { ...state, table: action.table, view: 'welcome', lastMessage: i18next.t('message.bind_table', { table: action.table }) }
+    }
     case 'SET_VIEW':
       return { ...state, view: action.view }
     case 'ADD_CART': {
@@ -89,7 +97,29 @@ export function orderReducer(state: AppState, action: AppAction): AppState {
     case 'PAY':
       return { ...state, paid: true, lastMessage: i18next.t('message.paid') }
     case 'RESET':
-      return { ...initialState, lastMessage: i18next.t('message.reset') }
+      // 重置的是门店会话级状态；当前门店是设备偏好，保持不变
+      return {
+        ...initialState,
+        currentStoreId: state.currentStoreId,
+        soldOut: getStore(state.currentStoreId)?.soldOut ?? initialState.soldOut,
+        lastMessage: i18next.t('message.reset'),
+      }
+    case 'SWITCH_STORE': {
+      const store = getStore(action.storeId)
+      if (!store || !isStoreSelectable(store)) {
+        return { ...state, lastMessage: i18next.t('message.store_switch_failed') }
+      }
+      // 清空门店会话级状态（桌台/购物车/订单/服务/沽清/支付/协同人），回到 home 重新绑桌；
+      // 语言、老人模式属设备偏好，不在该 state 内，天然保留。
+      return {
+        ...initialState,
+        currentStoreId: store.id,
+        soldOut: store.soldOut,
+        view: 'home',
+        table: null,
+        lastMessage: i18next.t('message.store_switched', { name: i18next.t(store.nameKey) }),
+      }
+    }
     case 'SET_MESSAGE':
       return { ...state, lastMessage: action.message }
     default:

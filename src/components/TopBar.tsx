@@ -1,4 +1,4 @@
-import { Accessibility, Crown, Languages, LayoutDashboard, MapPin, PhoneCall, ReceiptText, Search, UserRound } from 'lucide-react'
+import { Accessibility, ChevronDown, Crown, Languages, LayoutDashboard, MapPin, PhoneCall, ReceiptText, Search, Store, UserRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
@@ -6,6 +6,7 @@ import { tableAreas } from '@/data/menu'
 import type { ViewName } from '@/types'
 
 interface TopBarProps {
+  storeName: string
   table: string
   view: ViewName
   serviceCount: number
@@ -16,9 +17,10 @@ interface TopBarProps {
   onView: (view: ViewName) => void
   onService: () => void
   onConsole: () => void
+  onSwitchStore: () => void
 }
 
-export function TopBar({ table, view, serviceCount, language, elderly, onToggleLanguage, onToggleElderly, onView, onService, onConsole }: TopBarProps) {
+export function TopBar({ storeName, table, view, serviceCount, language, elderly, onToggleLanguage, onToggleElderly, onView, onService, onConsole, onSwitchStore }: TopBarProps) {
   const { t } = useTranslation()
   const areaKey = tableAreas[table]
   const tableLabel = areaKey ? `${table} · ${t(areaKey)}` : table
@@ -29,12 +31,19 @@ export function TopBar({ table, view, serviceCount, language, elderly, onToggleL
         {t('common.banner')}
       </div>
       <header className="sticky top-0 z-30 border-b border-charcoal-900/5 bg-rice-50/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 lg:px-6">
-          <button onClick={() => onView('menu')} className="flex items-center gap-2 text-left">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 lg:gap-3 lg:px-6">
+          <button onClick={() => onView('menu')} className="flex shrink-0 items-center gap-2 text-left">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-chili-500 text-lg font-black text-white shadow-md">{t('common.brand')}</span>
             <span className="hidden sm:block"><strong className="block leading-4 text-charcoal-900">{t('common.brand_name')}</strong><small className="text-charcoal-500">{t('common.subtitle')}</small></span>
           </button>
-          <span className="ml-1 flex items-center gap-1 rounded-full bg-rice-200 px-3 py-2 text-xs font-bold text-charcoal-700"><MapPin size={13} className="text-chili-500" />{tableLabel}</span>
+          <button
+            onClick={onSwitchStore}
+            aria-label={t('store.topbar_aria', { name: storeName })}
+            className="flex min-w-0 items-center gap-1 rounded-full bg-chili-50 px-2.5 py-2 text-xs font-bold text-chili-600 transition hover:bg-chili-100 lg:px-3"
+          >
+            <Store size={13} className="shrink-0" /><span className="max-w-[5.5rem] truncate sm:max-w-[9rem] lg:max-w-[13rem]">{storeName}</span><ChevronDown size={12} className="shrink-0" />
+          </button>
+          <span className="flex shrink-0 items-center gap-1 rounded-full bg-rice-200 px-3 py-2 text-xs font-bold text-charcoal-700"><MapPin size={13} className="text-chili-500" />{tableLabel}</span>
           <nav className="ml-auto hidden items-center gap-1 md:flex">
             <Button variant={view === 'menu' ? 'secondary' : 'ghost'} size="sm" onClick={() => onView('menu')}><Search size={16} />{t('common.nav_menu')}</Button>
             <Button variant={view === 'order' ? 'secondary' : 'ghost'} size="sm" onClick={() => onView('order')}><ReceiptText size={16} />{t('common.nav_order')}</Button>
