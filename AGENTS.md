@@ -31,6 +31,7 @@ src/
 └── assets/                # hotpot/broth/beef/vegetables 图片
 e2e/super-spicy.spec.ts    # 超级辣风险提示 E2E 验收
 e2e/view-routing.spec.ts   # 视图 URL hash 路由 E2E 验收
+e2e/mobile-responsive.spec.ts # 手机视口（390/320px）无横向滚动与底部导航 E2E 验收
 index.html                 # 入口，含初始化语言的内联脚本
 tailwind.config.js         # 自定义色板；vite.config.ts 配 base './' 与 @ 别名
 playwright.config.ts       # E2E 配置

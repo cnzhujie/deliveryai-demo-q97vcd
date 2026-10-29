@@ -32,7 +32,7 @@ export function OrderView({ items, stage, onAddMore, onCancel, onCheckout }: Ord
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 lg:px-6 lg:py-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-bold text-chili-500">{t('order.badge')}</p><h1 className="mt-1 text-3xl font-extrabold text-charcoal-900">{t('order.title')}</h1></div><Button variant="outline" onClick={onAddMore}><Plus size={17} />{t('order.add_more')}</Button></div>
-      <div className="mt-6 grid gap-5 lg:grid-cols-5">
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-5">
         <section className="rounded-3xl bg-charcoal-900 p-5 text-white shadow-card lg:col-span-2">
           <div className="flex items-center justify-between"><h2 className="font-bold">{t('order.progress')}</h2><span className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs text-amber-400"><Clock3 size={13} />{t('order.realtime')}</span></div>
           <div className="mt-6 space-y-1">

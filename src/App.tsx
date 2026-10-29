@@ -53,8 +53,16 @@ export default function App() {
   const [serviceOpen, setServiceOpen] = useState(false)
   const [consoleOpen, setConsoleOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
+  const [toastVisible, setToastVisible] = useState(true)
   const cartTotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const waitingServices = state.services.filter((service) => service.status === 'waiting').length
+
+  // 消息提示为临时 toast：新消息出现时展示，2.6s 后自动收起，避免常驻遮挡手机端吸顶搜索栏
+  useEffect(() => {
+    setToastVisible(true)
+    const timer = setTimeout(() => setToastVisible(false), 2600)
+    return () => clearTimeout(timer)
+  }, [state.lastMessage])
 
   // 视图 ↔ URL hash 双向同步；未绑定桌台时只有 home 可达，其余地址回落到 home
   const canView = useCallback((view: ViewName) => view === 'home' || !!state.table, [state.table])
@@ -95,7 +103,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-rice-100 paper-noise">
+    <div className="min-h-screen bg-rice-100 pb-[calc(5rem+env(safe-area-inset-bottom))] paper-noise lg:pb-0">
       <TopBar
         table={state.table}
         view={state.view}
@@ -110,8 +118,8 @@ export default function App() {
       />
 
       {state.view === 'menu' && (
-        <main className="mx-auto grid max-w-7xl gap-6 px-4 py-5 pb-28 lg:grid-cols-3 lg:px-6 lg:py-7 lg:pb-8">
-          <div className="lg:col-span-2">
+        <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-5 lg:grid-cols-3 lg:px-6 lg:py-7">
+          <div className="min-w-0 lg:col-span-2">
             <MenuView diners={state.diners} soldOut={state.soldOut} onAdd={(item) => dispatch({ type: 'ADD_CART', item })} />
           </div>
           <aside className="hidden lg:block">
@@ -160,7 +168,7 @@ export default function App() {
         </DialogContent>
       </Dialog>
 
-      <div className="fixed bottom-20 left-1/2 z-30 -translate-x-1/2 lg:hidden">
+      <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-1/2 z-30 -translate-x-1/2 lg:hidden">
         {state.view === 'menu' && state.cart.length > 0 && (
           <Button onClick={() => setCartOpen(true)} className="h-12 rounded-full px-5 shadow-float">
             <span className="relative"><ShoppingBasket size={19} /><span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-400 px-1 text-xs text-charcoal-900">{state.cart.length}</span></span>
@@ -176,9 +184,11 @@ export default function App() {
         <MobileNav active={consoleOpen} icon={LayoutDashboard} label={t('common.nav_demo')} onClick={() => setConsoleOpen(true)} />
       </nav>
 
-      <div className="pointer-events-none fixed left-1/2 top-24 z-40 -translate-x-1/2 rounded-full bg-charcoal-900/90 px-4 py-2 text-xs font-semibold text-white shadow-float">
-        {state.lastMessage}
-      </div>
+      {toastVisible && state.lastMessage && (
+        <div className="pointer-events-none fixed left-1/2 top-20 z-40 max-w-[calc(100vw-2rem)] -translate-x-1/2 truncate rounded-full bg-charcoal-900/90 px-4 py-2 text-center text-xs font-semibold text-white shadow-float">
+          {state.lastMessage}
+        </div>
+      )}
     </div>
   )
 }
