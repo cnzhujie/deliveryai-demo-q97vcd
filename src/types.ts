@@ -42,6 +42,7 @@ export interface ServiceRequest {
 
 export interface AppState {
   view: ViewName
+  currentStoreId: string
   table: string | null
   diners: string[]
   cart: CartItem[]
@@ -66,4 +67,5 @@ export type AppAction =
   | { type: 'REQUEST_CANCEL'; uid: string }
   | { type: 'PAY' }
   | { type: 'RESET' }
+  | { type: 'SWITCH_STORE'; storeId: string }
   | { type: 'SET_MESSAGE'; message: string }

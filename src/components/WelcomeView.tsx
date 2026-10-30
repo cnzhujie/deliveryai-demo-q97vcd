@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button'
 import { tableAreas } from '@/data/menu'
 
 interface WelcomeViewProps {
+  storeName: string
   table: string
   onEnter: () => void
 }
 
-export function WelcomeView({ table, onEnter }: WelcomeViewProps) {
+export function WelcomeView({ storeName, table, onEnter }: WelcomeViewProps) {
   const { t } = useTranslation()
   const areaKey = tableAreas[table]
   const tableLabel = areaKey ? `${table} · ${t(areaKey)}` : table
@@ -30,7 +31,7 @@ export function WelcomeView({ table, onEnter }: WelcomeViewProps) {
                 <Store size={18} className="opacity-80" />
                 <div>
                   <p className="text-xs opacity-80">{t('common.simulated_store')}</p>
-                  <h2 className="text-lg font-bold">{t('common.store_name')}</h2>
+                  <h2 className="text-lg font-bold">{storeName}</h2>
                 </div>
               </div>
               <span className="rounded-full bg-white/20 px-3 py-1 text-xs backdrop-blur">{t('common.open')}</span>

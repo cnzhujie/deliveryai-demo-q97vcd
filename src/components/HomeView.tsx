@@ -1,19 +1,18 @@
 import { useTranslation } from 'react-i18next'
-import { Check, ChevronRight, MapPin, QrCode, Sparkles, Users } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, MapPin, QrCode, Sparkles, Users } from 'lucide-react'
 import hotpot from '@/assets/hotpot.jpg'
 import { Button } from '@/components/ui/button'
+import type { Store } from '@/data/stores'
 
-const tableOptions = [
-  { code: 'A08', areaKey: 'bind.area.hall', seats: 4 },
-  { code: 'B12', areaKey: 'bind.area.booth', seats: 6 },
-  { code: 'C06', areaKey: 'bind.area.room', seats: 4 },
-  { code: 'D03', areaKey: 'bind.area.window', seats: 6 },
-]
+interface HomeViewProps {
+  store: Store
+  onBind: (table: string) => void
+  onOpenStorePicker: () => void
+}
 
-interface HomeViewProps { onBind: (table: string) => void }
-
-export function HomeView({ onBind }: HomeViewProps) {
+export function HomeView({ store, onBind, onOpenStorePicker }: HomeViewProps) {
   const { t } = useTranslation()
+  const closed = store.status === 'closed'
   return (
     <main className="relative min-h-screen overflow-hidden bg-rice-100 paper-noise">
       <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-chili-100 blur-3xl" />
@@ -36,20 +35,31 @@ export function HomeView({ onBind }: HomeViewProps) {
         </section>
 
         <section className="animate-rise rounded-3xl border border-white/80 bg-white/90 p-4 shadow-float backdrop-blur sm:p-6">
-          <div className="relative mb-6 h-48 overflow-hidden rounded-2xl sm:h-56">
+          <button
+            type="button"
+            onClick={onOpenStorePicker}
+            aria-label={t('store.card_aria')}
+            className="relative mb-6 block h-48 w-full overflow-hidden rounded-2xl text-left sm:h-56"
+          >
             <img src={hotpot} alt={t('bind.img_alt')} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/70 to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between text-white">
-              <div><p className="text-xs opacity-80">{t('common.simulated_store')}</p><h2 className="text-xl font-bold">{t('common.store_name')}</h2></div>
-              <span className="rounded-full bg-white/20 px-3 py-1 text-xs backdrop-blur">{t('common.open')}</span>
+            <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-chili-600 shadow-sm backdrop-blur">
+              {t('store.switch_hint')}<ChevronDown size={13} />
+            </span>
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <h2 className="text-xl font-bold">{t(store.nameKey)}</h2>
+              <p className="mt-0.5 flex items-center gap-1 text-xs opacity-90"><MapPin size={12} />{t(store.districtKey)} · {t(store.addressKey)}</p>
             </div>
-          </div>
+            <span className={`absolute bottom-4 right-4 rounded-full px-3 py-1 text-xs backdrop-blur ${closed ? 'bg-charcoal-900/50 text-white' : 'bg-white/20 text-white'}`}>
+              {closed ? t('store.status_closed') : t('store.status_open')}
+            </span>
+          </button>
           <div className="mb-4 flex items-center gap-3 rounded-2xl bg-rice-100 p-4">
             <span className="rounded-xl bg-white p-3 text-chili-500 shadow-sm"><QrCode /></span>
             <div className="min-w-0 flex-1"><p className="font-bold text-charcoal-900">{t('bind.qr_title')}</p><p className="text-sm text-charcoal-500">{t('bind.qr_desc')}</p></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {tableOptions.map(({ code, areaKey, seats }, index) => (
+            {store.tables.map(({ code, areaKey, seats }, index) => (
               <button key={code} onClick={() => onBind(code)} className="group rounded-2xl border border-charcoal-900/10 bg-white p-4 text-left transition hover:-translate-y-1 hover:border-chili-500 hover:shadow-card">
                 <span className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-rice-100 text-sm font-extrabold text-chili-500">{index + 1}</span>
                 <p className="font-bold text-charcoal-900">{code} · {t(areaKey)}</p>
@@ -58,7 +68,7 @@ export function HomeView({ onBind }: HomeViewProps) {
               </button>
             ))}
           </div>
-          <Button onClick={() => onBind('A08')} className="mt-4 w-full"><MapPin size={17} />{t('bind.quick_enter')}</Button>
+          <Button onClick={() => onBind(store.tables[0].code)} className="mt-4 w-full"><MapPin size={17} />{t('bind.quick_enter', { table: store.tables[0].code })}</Button>
         </section>
       </div>
     </main>

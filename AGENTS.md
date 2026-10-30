@@ -19,18 +19,21 @@ React 18 · TypeScript ~5.6 · Vite 6 · Tailwind CSS 3.4 · Radix UI（Dialog�
 src/
 ├── main.tsx               # 入口，挂载 React
 ├── App.tsx                # 根组件：useReducer + 视图路由 + 全局布局
-├── types.ts               # AppState / AppAction / Product / CartItem / OrderItem / ServiceRequest
-├── i18n.ts                # i18next 初始化 + zh/en 资源
+├── types.ts               # AppState（含 currentStoreId）/ AppAction（含 SWITCH_STORE）/ Product / CartItem / OrderItem / ServiceRequest
+├── i18n.ts                # i18next 初始化 + zh/en 资源（门店文案在 store.* 分组）
 ├── index.css              # 基础样式、老人模式、过渡、自定义 utilities
-├── state/orderReducer.ts  # 订单/购物车/服务/售罄/支付 reducer
-├── data/menu.ts           # 菜品/分类/桌台静态数据
+├── state/orderReducer.ts  # 订单/购物车/服务/售罄/支付/绑桌门店校验/切店重置 reducer
+├── state/storeGuard.ts    # 切店前会话状态 guard：allow / confirmCart / blockedUnpaid / confirmPaid
+├── data/menu.ts           # 菜品/分类/桌台区域静态数据（菜单全品牌共享）
+├── data/stores.ts         # 门店静态数据 + 桌台/默认沽清；默认店解析（深链接>localStorage>定位>默认店）；listStores() 为 GET /api/stores 替换点
 ├── hooks/useElderlyMode.ts# 老人模式：localStorage + html.elderly
 ├── hooks/useViewRoute.ts  # 视图 ↔ URL hash 双向同步（含深链接/非法地址纠正）
 ├── lib/utils.ts           # cn（类名合并）、money（¥ 格式化）
-├── components/            # 页面组件（HomeView/WelcomeView/MenuView/OrderView/CheckoutView 对应各视图）；通用件在 components/ui/（button、dialog）
+├── components/            # 页面组件（HomeView/WelcomeView/MenuView/OrderView/CheckoutView 对应各视图）；StorePicker（门店选择器，移动底部弹层/桌面弹窗）、StoreGuardDialog（切店确认/禁切）、StoreBlockedView（未开通点单空态）；通用件在 components/ui/（button、dialog）
 └── assets/                # hotpot/broth/beef/vegetables 图片
 e2e/super-spicy.spec.ts    # 超级辣风险提示 E2E 验收
 e2e/view-routing.spec.ts   # 视图 URL hash 路由 E2E 验收
+e2e/store-switch.spec.ts   # 切换分店：主路径、默认店优先级、四类 guard、桌台隔离与异常态 E2E 验收
 index.html                 # 入口，含初始化语言的内联脚本
 tailwind.config.js         # 自定义色板；vite.config.ts 配 base './' 与 @ 别名
 playwright.config.ts       # E2E 配置
@@ -58,7 +61,8 @@ playwright.config.ts       # E2E 配置
 - 页面组件放 `src/components/`，通用件放 `src/components/ui/`；弹窗用封装的 `Dialog`，按钮用 CVA `Button`（default/secondary/outline/ghost），图标用 lucide-react 并靠 `currentColor` 继承。
 - 样式只用 Tailwind 类名，不用 CSS Modules / styled-components。
 - 新增 i18n 文案在 `src/i18n.ts` 的 zh/en 两处同步添加，按功能分组（`common.`、`menu.`、`cart.`、`order.` 等）。
-- 新增 `localStorage` 持久化一律 `try/catch` 包裹，不可用时降级内存态；现有 key：`i18nextLng`、`elderly-mode`（`true`/`false`）。
+- 新增 `localStorage` 持久化一律 `try/catch` 包裹，不可用时降级内存态；现有 key：`i18nextLng`、`elderly-mode`（`true`/`false`）、`currentStoreId`（当前下单门店）。
+- 门店是点餐上下文：桌台与默认沽清从属于门店（`src/data/stores.ts`），绑桌只能绑定当前门店桌台，切店经 `SWITCH_STORE` 清空门店会话级状态、保留语言/老人模式。正式接入时只替换 `listStores()` 数据层，交互不变。
 - 需要在 React 挂载前设置 html 属性/class 时，扩展 `index.html` 的内联脚本。
 - npm 源默认走 `https://registry.npmmirror.com`（见根目录与 `server/.npmrc`）。
 
