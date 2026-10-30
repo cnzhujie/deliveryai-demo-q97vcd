@@ -276,4 +276,19 @@ test.describe('切换分店 - 桌台隔离与异常态', () => {
     await storeRow(page, 'wangjing').click()
     await expect(page.getByRole('button', { name: /E05/ }).first()).toBeVisible()
   })
+
+  test('STORE-014: 390px 移动端 TopBar 门店胶囊店名可见（中英双语），防 flex 压零回归', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await enterMenu(page, 'A08')
+
+    const capsuleName = page.getByTestId('store-capsule-name')
+    await expect(capsuleName).toHaveText(/国贸旗舰店/)
+    // truncate 元素被 flex 压缩时 clientWidth 会是 0；这里要求有可辨认的文字宽度
+    await expect.poll(async () => (await capsuleName.boundingBox())?.width ?? 0, { timeout: 5000 }).toBeGreaterThan(60)
+
+    // 英文店名更长，切英文后同样必须可见
+    await page.getByRole('button', { name: '切换语言' }).click()
+    await expect(capsuleName).toHaveText(/Guomao/i)
+    await expect.poll(async () => (await capsuleName.boundingBox())?.width ?? 0, { timeout: 5000 }).toBeGreaterThan(60)
+  })
 })

@@ -31,19 +31,23 @@ export function TopBar({ storeName, table, view, serviceCount, language, elderly
         {t('common.banner')}
       </div>
       <header className="sticky top-0 z-30 border-b border-charcoal-900/5 bg-rice-50/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 lg:gap-3 lg:px-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 md:h-16 md:flex-nowrap md:gap-3 md:py-0 lg:px-6">
           <button onClick={() => onView('menu')} className="flex shrink-0 items-center gap-2 text-left">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-chili-500 text-lg font-black text-white shadow-md">{t('common.brand')}</span>
             <span className="hidden sm:block"><strong className="block leading-4 text-charcoal-900">{t('common.brand_name')}</strong><small className="text-charcoal-500">{t('common.subtitle')}</small></span>
           </button>
-          <button
-            onClick={onSwitchStore}
-            aria-label={t('store.topbar_aria', { name: storeName })}
-            className="flex min-w-0 items-center gap-1 rounded-full bg-chili-50 px-2.5 py-2 text-xs font-bold text-chili-600 transition hover:bg-chili-100 lg:px-3"
-          >
-            <Store size={13} className="shrink-0" /><span className="max-w-[5.5rem] truncate sm:max-w-[9rem] lg:max-w-[13rem]">{storeName}</span><ChevronDown size={12} className="shrink-0" />
-          </button>
-          <span className="flex shrink-0 items-center gap-1 rounded-full bg-rice-200 px-3 py-2 text-xs font-bold text-charcoal-700"><MapPin size={13} className="text-chili-500" />{tableLabel}</span>
+          {/* 小屏折到第二行：门店胶囊弹性占满保证店名可见，桌台胶囊不缩；md 以上 contents 回到单行原布局 */}
+          <div className="order-3 flex w-full min-w-0 items-center gap-2 md:order-none md:contents">
+            <button
+              onClick={onSwitchStore}
+              data-testid="store-capsule"
+              aria-label={t('store.topbar_aria', { name: storeName })}
+              className="flex min-w-0 flex-1 items-center gap-1 rounded-full bg-chili-50 px-2.5 py-2 text-xs font-bold text-chili-600 transition hover:bg-chili-100 md:flex-none lg:px-3"
+            >
+              <Store size={13} className="shrink-0" /><span data-testid="store-capsule-name" className="min-w-0 flex-1 truncate text-left sm:max-w-[9rem] sm:flex-none lg:max-w-[13rem]">{storeName}</span><ChevronDown size={12} className="shrink-0" />
+            </button>
+            <span className="flex shrink-0 items-center gap-1 rounded-full bg-rice-200 px-3 py-2 text-xs font-bold text-charcoal-700"><MapPin size={13} className="text-chili-500" />{tableLabel}</span>
+          </div>
           <nav className="ml-auto hidden items-center gap-1 md:flex">
             <Button variant={view === 'menu' ? 'secondary' : 'ghost'} size="sm" onClick={() => onView('menu')}><Search size={16} />{t('common.nav_menu')}</Button>
             <Button variant={view === 'order' ? 'secondary' : 'ghost'} size="sm" onClick={() => onView('order')}><ReceiptText size={16} />{t('common.nav_order')}</Button>
